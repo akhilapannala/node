@@ -1,7 +1,4 @@
- 
 var http = require('http');
-const express = require('express');
-const app = express();
 var formidable = require('formidable');
 var fs = require('fs');
 
@@ -10,12 +7,46 @@ http.createServer(function (req, res) {
     var form = new formidable.IncomingForm();
     form.parse(req, function (err, fields, files) {
       var oldpath = files.filetoupload.path;
-      var newpath = 'C:/Users/ceksh/Desktop/node/' + files.filetoupload.name;
-      fs.rename(oldpath, newpath, function (err) {
+      console.log("Yet to read");
+	  //Read the file
+      fs.readFile(oldpath, function (err, data) {
+	  	if (err) throw err;
+		console.log('File read!');
+
+		var db = admin.firestore();
+		        
+		var lines = data.toString().split("\n");
+		for(i in lines) {
+    		console.log(lines[i]);
+    		var items = lines[i].split(',');
+    		var docRef = db.collection('users').doc(items[0]);
+			docRef.set({
+				name: items[1],
+				last: items[2],
+				born: items[3]
+			});
+			res.write(lines[i]);
+			console.log("document " + i + " added");
+		}
+		res.write("Logged Successfully!");
+
+		// Delete the file
+		fs.unlink(oldpath, function (err) {
         if (err) throw err;
-        res.write('File uploaded and moved!');
-        res.end();
-      });
+        console.log('File deleted!');
+      });		
+      
+	  //Get data from Firestore
+      db.collection('users').get().then((snapshot) => {
+          snapshot.forEach((doc) => {
+      	      res.write("<br/>", doc.id, '=>', doc.data());
+      	  });
+		})
+    	.catch((err) => {
+      		console.log('Error getting documents', err);
+    	});
+    	res.end();
+    });
  });
   }
    else {
