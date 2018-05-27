@@ -13,6 +13,10 @@ http.createServer(function (req, res) {
 	  	if (err) throw err;
 		console.log('File read!');
 
+	        const admin = require('firebase-admin');
+		admin.initializeApp({
+  		    credential: admin.credential.applicationDefault()
+		});
 		var db = admin.firestore();
 		        
 		var lines = data.toString().split("\n");
