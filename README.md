@@ -1,5 +1,5 @@
 # Data Management using Firebase and Node server
-======
+------
 
 ### Goal
 ------
